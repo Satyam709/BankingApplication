@@ -1,6 +1,7 @@
 import zod from "zod";
 import { User } from "../database.js";
 import jwt from "jsonwebtoken";
+import { BankAccount } from "../database.js";
 
 const userData = zod.object({
   firstname: zod.string(),
@@ -10,9 +11,7 @@ const userData = zod.object({
 });
 
 export default async function signup(req, res) {
-  console.log("got a request..");
-  console.log(req.body);
-
+    
   const { success } = userData.safeParse(req.body);
   if (!success) {
     return res.status(411).json({
@@ -37,6 +36,11 @@ export default async function signup(req, res) {
     });
 
     const userId = user._id;
+
+    const acc = await BankAccount.create({
+      balance: Math.random()*10000,
+      userId:userId
+    });
 
     const token = jwt.sign({ userId: userId }, process.env.SECRET);
 
